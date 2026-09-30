@@ -5,7 +5,7 @@ CC = clang++ -std=c++17
 ROOT_DIR = ..
 BIN_DIR = $(ROOT_DIR)/bin
 SRC_DIR = $(ROOT_DIR)/src
-OBJ_DIR = obj_arm64
+OBJ_DIR = obj_arm64$(if $(filter true,$(BOINC)),_boinc)
 EXEC = $(BIN_DIR)/geneferv
 
 CFLAGS = -Wall -Wextra -Wsign-conversion
@@ -23,17 +23,20 @@ endif
 
 OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/transformg.o
 
-.PHONY: all clean_obj rebuild
+.PHONY: all clean_obj rebuild FORCE
 all: $(EXEC)
 
 $(OBJ_DIR) $(BIN_DIR):
 	mkdir -p $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp makefile_linux_arm64 | $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(FLAGS) $(OCL_INC) -MMD -MP -c $< -o $@
 
-$(EXEC): $(OBJS) | $(BIN_DIR)
-	$(CC) $(FLAGS) $(LDFLAGS) $^ $(GMP_LIB) $(BOINC_LIB) $(BOINC_LIB_OCL) $(OCL_LIB) -o $@
+# Relink when switching between standalone and BOINC object directories.
+$(EXEC): $(OBJS) FORCE | $(BIN_DIR)
+	$(CC) $(FLAGS) $(LDFLAGS) $(OBJS) $(GMP_LIB) $(BOINC_LIB) $(BOINC_LIB_OCL) $(OCL_LIB) -o $@
+
+FORCE:
 
 clean_obj:
 	rm -rf $(OBJ_DIR)

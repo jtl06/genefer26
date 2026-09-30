@@ -1,6 +1,8 @@
 # ARM64 GPU validation
 
-Run the host vector and version-1 file-layout tests from the repository root:
+Run the host vector and version-1 file-layout tests with Clang on ARM64 or Linux
+x64, from the repository root. The layout test checks the Linux x64 Clang layout;
+the version-1 format includes compiler-dependent object padding.
 
 ```sh
 clang++ -std=c++17 -O2 test/vint.cpp -o /tmp/genefer-vint-test

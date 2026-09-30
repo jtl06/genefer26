@@ -47,23 +47,14 @@ make -f makefile_linux_arm64 -j4
 
 This target is standalone by default. To enable the BOINC interface, pass
 `BOINC=true BOINC_DIR=/path/to/native/boinc/build`. The BOINC libraries must be
-built for ARM64. Building the interface does not imply that a BOINC project
-currently distributes work for this application/platform.
+built for ARM64.
 
 The `-cpu` option is unsupported on ARM64 and reports an error. CPU certificate
-processing can be performed by an existing supported x86 build. The OpenCL
-backend and on-disk proof/certificate formats are unchanged.
+processing can be performed by an existing supported x86 build. Version-1
+proof/certificate compatibility has been checked with Linux x64 Clang builds.
 
-From the repository root, check host vector operations and the version-1 base-vector file layout with:
-
-```sh
-clang++ -std=c++17 -O2 test/vint.cpp -o /tmp/genefer-vint-test
-/tmp/genefer-vint-test
-clang++ -std=c++17 -O2 test/b_vec.cpp -o /tmp/genefer-layout-test
-/tmp/genefer-layout-test
-```
-
-See [the validation instructions](test/README.md) for GPU proof, certificate, and checkpoint checks.
+See [the validation instructions](test/README.md) for host tests and GPU proof,
+certificate, and checkpoint checks.
 
 ## Licence
 

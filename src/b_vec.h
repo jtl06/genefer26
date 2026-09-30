@@ -16,9 +16,12 @@ template<size_t SIZE>
 class b_vec
 {
 private:
-	// Version-1 proof/certificate headers store this object's native layout.
-	// Match the 32-byte vector alignment of the x64 Clang builds on ARM64 too.
-	alignas(32) UInt32_8 _b[SIZE];
+#if defined(__aarch64__)
+	// Version-1 files store this object's native layout. Match Linux x64 Clang's
+	// vector offset on ARM64 without changing existing x86 compiler layouts.
+	alignas(32)
+#endif
+	UInt32_8 _b[SIZE];
 
 public:
 	explicit b_vec() {}

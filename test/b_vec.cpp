@@ -1,5 +1,5 @@
 // Version-1 proof/certificate headers include a raw b_vec object.
-// Keep its vector offset and total size compatible across 64-bit hosts.
+// ARM64 must match the vector offset and total size of Linux x64 Clang builds.
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
