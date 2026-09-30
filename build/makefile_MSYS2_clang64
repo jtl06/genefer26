@@ -37,7 +37,7 @@ OFLAGS = -ffinite-math-only -ffp-contract=fast -fno-trapping-math -fno-signed-ze
 FLAGS = -O3
 
 # AVX10.2 was introduced in GCC 15 and LLVM/Clang 22. Remove transform_avx10.o if the compiler is older.
-OBJS = main.o transform_sse4.o transform_avx.o transform_fma.o transform_avx512.o transform_avx10.o transformg_sse2.o transformg_avx2.o transformg_avx512.o
+OBJS = main.o transform_sse4.o transform_avx.o transform_fma.o transform_avx512.o transform_avx10.o transformg.o transformg_avx2.o transformg_avx512.o
 DEPS_COMMON = $(SRC_DIR)/transform.h $(SRC_DIR)/vint.h $(SRC_DIR)/mpz_vec.h $(SRC_DIR)/file.h $(SRC_DIR)/pio.h $(SRC_DIR)/boinc.h $(SRC_DIR)/alignment.h
 DEPS_MAIN = $(SRC_DIR)/genefer.h $(SRC_DIR)/timer.h $(DEPS_COMMON)
 DEPS_TRANSFORM_CPU = $(SRC_DIR)/transformCPU.h $(SRC_DIR)/vdouble.h $(DEPS_COMMON)
@@ -78,7 +78,7 @@ transform_avx10.o: $(SRC_DIR)/transform_avx10.cpp $(DEPS_TRANSFORM_CPU)
 	$(CC) $(CFLAGS) $(OFLAGS) $(FLAGS) -mavx10.2 -mtune=novalake -c $< -o $@
 #	$(CC) $(CFLAGS) $(OFLAGS) $(FLAGS) -mavx10.2 -mtune=novalake -S $< -o avx10.asm
 
-transformg_sse2.o: $(SRC_DIR)/transformg_sse2.cpp $(DEPS_TRANSFORM_GPU)
+transformg.o: $(SRC_DIR)/transformg.cpp $(DEPS_TRANSFORM_GPU)
 	$(CC) $(CFLAGS) $(FLAGS) $(OCL_INC) -mtune=westmere -c $< -o $@
 #	$(CC) $(CFLAGS) $(FLAGS) $(OCL_INC) -mtune=westmere -S $< -o sse2g.asm
 

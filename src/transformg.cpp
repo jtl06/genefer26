@@ -7,7 +7,13 @@ Please give feedback to the authors if improvement is realized. It is distribute
 
 #include <stdexcept>
 
-#define arch_g_namespace	arch_g_sse2_namespace
+#define arch_g_namespace	arch_g_generic_namespace
+
+#if defined(__aarch64__)
+#define HOST_TYPE "ARM64"
+#else
+#define HOST_TYPE "SSE2"
+#endif
 
 #include "transformGPU.h"
 
@@ -39,9 +45,9 @@ void get_opencl_ids(int argc, char * argv[], cl_device_id & boinc_device_id, cl_
 
 #endif
 
-#define _create_ocl_sse2(SIZE) \
+#define _create_ocl(SIZE) \
 template<> \
-transform<SIZE> * transform<SIZE>::create_ocl_sse2(const b_vec<SIZE / 8> & b, const int n, const size_t num_regs, const size_t device, \
+transform<SIZE> * transform<SIZE>::create_ocl(const b_vec<SIZE / 8> & b, const int n, const size_t num_regs, const size_t device, \
 											const bool is_boinc, const bool get_boinc_ids, int _boinc_argc, char ** _boinc_argv) \
 { \
 	cl_platform_id boinc_platform_id = 0; \
@@ -53,26 +59,26 @@ transform<SIZE> * transform<SIZE>::create_ocl_sse2(const b_vec<SIZE / 8> & b, co
  \
 	if (b_max <= 1000000000) \
 	{ \
-		ptransform = arch_g_sse2_namespace::create_transformGPU<SIZE, false>(b, n, num_regs, device, is_boinc, boinc_platform_id, boinc_device_id); \
+		ptransform = arch_g_generic_namespace::create_transformGPU<SIZE, false>(b, n, num_regs, device, is_boinc, boinc_platform_id, boinc_device_id); \
 	} \
 	else \
 	{ \
-		ptransform = arch_g_sse2_namespace::create_transformGPU<SIZE, true>(b, n, num_regs, device, is_boinc, boinc_platform_id, boinc_device_id); \
+		ptransform = arch_g_generic_namespace::create_transformGPU<SIZE, true>(b, n, num_regs, device, is_boinc, boinc_platform_id, boinc_device_id); \
 	} \
-	ptransform->set_type("SSE2"); \
+	ptransform->set_type(HOST_TYPE); \
 	return ptransform; \
 }
 
 template<size_t VSIZE>
-transform<VSIZE> * transform<VSIZE>::create_ocl_sse2(const b_vec<VSIZE / 8> &, const int, const size_t, const size_t,
+transform<VSIZE> * transform<VSIZE>::create_ocl(const b_vec<VSIZE / 8> &, const int, const size_t, const size_t,
 											const bool, const bool, int, char **) { return nullptr; }
 
 #ifndef NO8
-_create_ocl_sse2(8)
+_create_ocl(8)
 #endif
 #ifndef NO16
-_create_ocl_sse2(16)
+_create_ocl(16)
 #endif
 #ifndef NO32
-_create_ocl_sse2(32)
+_create_ocl(32)
 #endif

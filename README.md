@@ -22,13 +22,48 @@ The x64 implementation is highly optimized for CPU with AVX-512 or AVX10.2 (AMD 
 ## Operating system
 
  - Linux x64  
+ - Linux ARM64 (OpenCL GPU execution only)
  - Windows x64  
  
 ## Build
 
 Select the [makefile](https://github.com/galloty/genefer26/tree/main/build) of your target. On Windows, [MSYS2](https://www.msys2.org/) distribution and building platform can be installed.  
 The compiler (gcc or clang) can be selected, Boinc interface is optional.  
-The default settings are clang and linked to Boinc.  
+The x64 makefiles default to clang with the Boinc interface enabled.
+
+### Linux ARM64 GPU build
+
+The ARM64 build uses the existing OpenCL kernels with native host code. A GPU
+OpenCL driver is required; installing only an OpenCL loader or the CUDA toolkit
+is not sufficient. Check device discovery with `clinfo`.
+
+On Debian/Ubuntu, install `clang`, `make`, `libgmp-dev`, and
+`ocl-icd-opencl-dev`, then build from the `build` directory:
+
+```sh
+make -f makefile_linux_arm64 -j4
+../bin/geneferv -v
+```
+
+This target is standalone by default. To enable the BOINC interface, pass
+`BOINC=true BOINC_DIR=/path/to/native/boinc/build`. The BOINC libraries must be
+built for ARM64. Building the interface does not imply that a BOINC project
+currently distributes work for this application/platform.
+
+The `-cpu` option is unsupported on ARM64 and reports an error. CPU certificate
+processing can be performed by an existing supported x86 build. The OpenCL
+backend and on-disk proof/certificate formats are unchanged.
+
+From the repository root, check host vector operations and the version-1 base-vector file layout with:
+
+```sh
+clang++ -std=c++17 -O2 test/vint.cpp -o /tmp/genefer-vint-test
+/tmp/genefer-vint-test
+clang++ -std=c++17 -O2 test/b_vec.cpp -o /tmp/genefer-layout-test
+/tmp/genefer-layout-test
+```
+
+See [the validation instructions](test/README.md) for GPU proof, certificate, and checkpoint checks.
 
 ## Licence
 

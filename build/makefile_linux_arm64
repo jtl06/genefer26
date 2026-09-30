@@ -1,0 +1,44 @@
+# Native Linux ARM64 build for OpenCL GPU execution only.
+# Debian/Ubuntu: clang, libgmp-dev, ocl-icd-opencl-dev and a GPU OpenCL ICD.
+# Use BOINC=true with BOINC_DIR pointing to a native BOINC build to enable BOINC.
+CC = clang++ -std=c++17
+ROOT_DIR = ..
+BIN_DIR = $(ROOT_DIR)/bin
+SRC_DIR = $(ROOT_DIR)/src
+OBJ_DIR = obj_arm64
+EXEC = $(BIN_DIR)/geneferv
+
+CFLAGS = -Wall -Wextra -Wsign-conversion
+FLAGS = -O3 -pthread
+OCL_INC = -I$(ROOT_DIR)/Khronos
+OCL_LIB = -lOpenCL
+GMP_LIB = -lgmp
+
+ifeq ($(BOINC),true)
+BOINC_DIR ?= $(ROOT_DIR)/../boinc
+CFLAGS += -DBOINC -I$(BOINC_DIR) -I$(BOINC_DIR)/api -I$(BOINC_DIR)/lib
+BOINC_LIB = $(BOINC_DIR)/api/libboinc_api.a $(BOINC_DIR)/lib/libboinc.a
+BOINC_LIB_OCL = $(BOINC_DIR)/api/libboinc_opencl.a
+endif
+
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/transformg.o
+
+.PHONY: all clean_obj rebuild
+all: $(EXEC)
+
+$(OBJ_DIR) $(BIN_DIR):
+	mkdir -p $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(FLAGS) $(OCL_INC) -MMD -MP -c $< -o $@
+
+$(EXEC): $(OBJS) | $(BIN_DIR)
+	$(CC) $(FLAGS) $(LDFLAGS) $^ $(GMP_LIB) $(BOINC_LIB) $(BOINC_LIB_OCL) $(OCL_LIB) -o $@
+
+clean_obj:
+	rm -rf $(OBJ_DIR)
+
+rebuild: clean_obj
+	$(MAKE) -f makefile_linux_arm64 all
+
+-include $(OBJS:.o=.d)

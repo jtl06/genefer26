@@ -7,9 +7,13 @@ Please give feedback to the authors if improvement is realized. It is distribute
 
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 
+#if defined(__i386__) || defined(__x86_64__)
 #include <immintrin.h>
+#endif
 
 #ifndef finline
 #define finline	__attribute__((always_inline)) inline

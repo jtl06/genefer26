@@ -95,7 +95,7 @@ private:
 		const bool is_boinc, const bool get_boinc_ids, int _boinc_argc, char ** _boinc_argv);
 	static transform * create_ocl_avx2(const bvec & b, const int n, const size_t num_regs, const size_t device,
 		const bool is_boinc, const bool get_boinc_ids, int _boinc_argc, char ** _boinc_argv);
-	static transform * create_ocl_sse2(const bvec & b, const int n, const size_t num_regs, const size_t device,
+	static transform * create_ocl(const bvec & b, const int n, const size_t num_regs, const size_t device,
 		const bool is_boinc, const bool get_boinc_ids, int _boinc_argc, char ** _boinc_argv);
 
 	static transform * create_avx10(const bvec & b, const int n, const size_t num_regs);
@@ -324,6 +324,9 @@ public:
 								  const bool isBoinc, const bool get_boinc_ids, int _boinc_argc, char ** _boinc_argv)
 
 	{
+#if defined(__aarch64__)
+		return transform::create_ocl(b, n, num_regs, device, isBoinc, get_boinc_ids, _boinc_argc, _boinc_argv);
+#else
 		transform * ptransform = nullptr;
 
 		__builtin_cpu_init();
@@ -335,13 +338,18 @@ public:
 		{
 			ptransform = transform::create_ocl_avx2(b, n, num_regs, device, isBoinc, get_boinc_ids, _boinc_argc, _boinc_argv);
 		}
-		else ptransform = transform::create_ocl_sse2(b, n, num_regs, device, isBoinc, get_boinc_ids, _boinc_argc, _boinc_argv);	// SSE2 is mandatory for x64 
+		else ptransform = transform::create_ocl(b, n, num_regs, device, isBoinc, get_boinc_ids, _boinc_argc, _boinc_argv);	// SSE2 is mandatory for x64
 
 		return ptransform;
+#endif
 	}
 
 	static transform * create_cpu(const bvec & b, const int n, const size_t num_regs)
 	{
+#if defined(__aarch64__)
+		(void)b; (void)n; (void)num_regs;
+		throw std::runtime_error("CPU mode is not supported by the ARM64 GPU-only build");
+#else
 		transform * ptransform = nullptr;
 
 		__builtin_cpu_init();
@@ -372,6 +380,7 @@ public:
 
 		if (ptransform == nullptr) throw std::runtime_error("processor must support SSE4.1");
 		return ptransform;
+#endif
 	}
 
 	const std::string get_type() const { return _type; }
